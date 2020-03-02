@@ -2,86 +2,121 @@ import json
 import pickle
 
 from Ingredients import *
+from exceptions import *
 from meal import *
 from order import *
 import socket
+import sys
 from request import *
 from kitchen import *
 
-HOST = '127.0.0.1'
-PORT = 3000
-SIZE = 1000
-HEADERSIZE = 10
-WORKERS = 2
 
-conn = None
-addr = None
-soc = None
-order_m = None
+def synchronized(func):
+    """ Represent synchronized keyword in java """
+    func.__lock__ = threading.Lock()
 
+    def synced_func(*args, **kws):
+        with func.__lock__:
+            return func(*args, **kws)
 
-def create_connection():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((HOST, PORT))
-    s.listen()
-    global conn, addr
-    global soc
-    soc = s
-    conn, addr = s.accept()
+    return synced_func
 
 
-def send_object(data):
-    if soc is None:
-        raise NotImplementedError  # There is no connection
-    else:
-        # make data as bytes
-        global conn
-        msg = pickle.dumps(data)
-        msg = bytes(f"{len(msg):<{HEADERSIZE}}", 'utf-8') + msg
-        conn.send(msg)
+class Server:
+    HOST = '127.0.0.1'
+    PORT = 3000
+    SIZE = 1000
+    HEADERSIZE = sys.getsizeof(int)
+    WORKERS = 1
 
+    _s_instance = None
+    conn = None
+    addr = None
+    soc = None
+    order_m = None
+    kitchen_obj = None
+    ing_map = None
 
-def get_object():
-    global conn
-    if conn is None:
-        raise NotImplementedError  # There is no connection
-    else:
-        # unpickle the data
-        data = b''
-        while True:
-            part = conn.recv(SIZE)
-            data += part
-            if len(part) < SIZE:
-                break
-        full_msg = data
+    @synchronized
+    def __new__(cls, *args, **kwargs):
+        if not cls._s_instance:
+            cls._s_instance = super(Server, cls).__new__(cls, *args, **kwargs)
+        return cls._s_instance
+
+    def create_connection(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind((self.HOST, self.PORT))
+        s.listen()
+        self.soc = s
+        self.conn, self.addr = s.accept()
+
+    def send_object(self, data):
+        if self.soc is None:
+            raise NotImplementedError  # There is no connection
+        else:
+            # make data as bytes
+            msg = pickle.dumps(data)
+            msg = bytes(f"{len(msg):<{self.HEADERSIZE}}", 'utf-8') + msg
+            self.conn.send(msg)
+
+    def get_object(self):
+        if self.conn is None:
+            raise NotImplementedError  # There is no connection
+        else:
+            # unpickle the data
+            length = self.conn.recv(self.HEADERSIZE).decode('utf-8')
+            if len(length):
+                length = int(length)
+                data = b''
+                while True:
+                    part = self.conn.recv(min(self.SIZE, length - len(data)))
+                    data += part
+                    if length == len(data):
+                        break
+                full_msg = data
+                try:
+                    data = pickle.loads(full_msg)
+                except EOFError:
+                    data = None
+                return data
+            else:
+                return None
+
+    @synchronized
+    def prepare_order(self):
+        order = None
+        print(self.order_m)
         try:
-            data = pickle.loads(full_msg[HEADERSIZE:])
-        except EOFError:
-            data = None
-        return data
+            order = self.order_m.peek()
+        except NotAvailableOrder:
+            return
 
+        try:
+            self.kitchen_obj.make_order(order)
+        except NotAvailableWorker:
+            return
 
-def main():
-    create_connection()
-    # Initialize objects
-    global order_m
-    ing_map = Ingredient_map()
-    order_m = OrderManager()
-    kitchen_obj = Kitchen(WORKERS)
+    def main(self):
+        self.create_connection()
+        # Initialize objects
+        self.ing_map = Ingredient_map()
+        self.order_m = OrderManager()
+        self.kitchen_obj = Kitchen(self.WORKERS, self)
 
-    while True:
-        msg = get_object()
-        if msg is None:
-            pass
-        elif msg.req == Request.G_ING_MAP:  # get ingredient map
-            send_object(ing_map.instance.map)
-        elif msg.req == Request.P_ORDER:
-            order_m.add_order(msg.data)
-            print(msg.data)
+        while True:
+            msg = self.get_object()
+            if msg is None:
+                pass
+            elif msg.req == Request.G_ING_MAP:  # get ingredient map
+                self.send_object(self.ing_map.instance.map)
+            elif msg.req == Request.P_ORDER:
+                self.order_m.add_order(msg.data)
+                self.prepare_order()
 
-    # end while
-    soc.close()
+        # end while
+        soc.close()
 
 
 if __name__ == "__main__":
-    main()
+    server = Server()
+    server.main()

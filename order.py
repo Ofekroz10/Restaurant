@@ -1,11 +1,12 @@
 from enum import IntEnum
-from _collections import  deque
+from heapq import *
+import exceptions
 
 
 class Priority(IntEnum):
-    NORMAL = 0
+    NORMAL = 2
     PLUS = 1
-    VIP = 2
+    VIP = 0
 
 
 class Order:
@@ -15,11 +16,17 @@ class Order:
     def __init__(self, priority, ):
         self.meals_lst = list()
         self.order_id = Order.id
-        Order.id = Order.id+1
+        Order.id = Order.id + 1
         self.priority = priority
 
     def __str__(self):
         return str(self.order_id) + ' ' + str(self.priority)
+
+    def calc_sec(self):
+        sec = 0
+        for meal in self.meals_lst:
+            sec += meal.seconds
+        return sec
 
 
 class Priorityble:
@@ -29,64 +36,87 @@ class Priorityble:
     @property
     def priority(self):
         try:
-            return  self._priority
+            return self._priority
         except:
             raise NotImplementedError
 
 
 class Client(Priorityble):
-    def __init__(self,name,priority):
+
+    @property
+    def map(self):
+        try:
+            return self.map
+        except:
+            raise NotImplementedError
+
+    def __init__(self, name, priority):
         super(priority)
         self.name = name
 
 
-class OrderManager:
+class OrderManager:  # make singlethon... with thread safe
     def __init__(self):
-        self._orders = PriorityQueue()
+        self._orders = PriorityQueue(self)
+        self.map = {}
 
     def add_order(self, order):
-        self._orders.append(order)
+        id = order.order_id
+        self.map[id] = order
+        self._orders.append(id)
+        print('add order ', id, ' to the queue')
 
-    def pop_order(self, order):
+    def pop_order(self):
+        if len(self._orders) == 0:
+            raise exceptions.NotAvailableOrder
         return self._orders.pop()
 
     def peek(self):
         return self._orders.peek()
 
     def __str__(self):
-        return str(self._orders)
+        return '$ ' + str(self._orders)
 
     def __len__(self):
         return len(self._orders)
 
 
 class PriorityQueue:
-    def __init__(self):
-        self.collection = deque()
+    def __init__(self, order_manager):
+        self.collection = []
+        self.order_manager = order_manager
 
     def __str__(self):
         return ' '.join([str(i) for i in self.collection])
 
-    def append(self, order):
-        if len(self.collection) == 0:
-            self.collection.append(order)
+    def append(self, id):
+        priority = self.order_manager.map.get(id).priority
+        heappush(self.collection, (priority, id))
+
+        """
+        if len(self.collection) > 0:
+        
         else:
+            
             i = 0
+            order = self.order_manager.map.get(id)
             for item in self.collection:
-                if item.priority >= order.priority:
+                item_obj = self.order_manager.map.get(item)
+                if item_obj.priority >= order.priority:
                     i = i+1
                 else:
                     break
-            self.collection.insert(i, order)
+            self.collection.insert(i, id) 
+            """
 
     def pop(self):
-        self.collection.pop()
+        priority, item = heappop(self.collection)
+        return item
 
     def peek(self):
-        return self.collection[0]
+        if len(self.collection) == 0:
+            raise exceptions.NotAvailableOrder
+        return self.collection[0][1]
 
     def __len__(self):
         return len(self.collection)
-
-
-
