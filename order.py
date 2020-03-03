@@ -1,3 +1,5 @@
+
+import sys
 from enum import IntEnum
 from heapq import *
 import exceptions
@@ -27,32 +29,6 @@ class Order:
         for meal in self.meals_lst:
             sec += meal.seconds
         return sec
-
-
-class Priorityble:
-    def __init__(self, priority):
-        self._priority = priority
-
-    @property
-    def priority(self):
-        try:
-            return self._priority
-        except:
-            raise NotImplementedError
-
-
-class Client(Priorityble):
-
-    @property
-    def map(self):
-        try:
-            return self.map
-        except:
-            raise NotImplementedError
-
-    def __init__(self, name, priority):
-        super(priority)
-        self.name = name
 
 
 class OrderManager:  # make singlethon... with thread safe
@@ -120,3 +96,4 @@ class PriorityQueue:
 
     def __len__(self):
         return len(self.collection)
+

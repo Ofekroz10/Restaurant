@@ -4,7 +4,7 @@ import pickle
 from Ingredients import *
 from exceptions import *
 from meal import *
-from order import *
+from order import OrderManager
 import socket
 import sys
 from request import *
@@ -28,14 +28,25 @@ class Server:
     SIZE = 1000
     HEADERSIZE = sys.getsizeof(int)
     WORKERS = 1
-
     _s_instance = None
-    conn = None
-    addr = None
-    soc = None
-    order_m = None
-    kitchen_obj = None
-    ing_map = None
+
+
+    def __init__(self):
+        self.conn = None
+        self.addr = None
+        self.soc = None
+        self.order_m = None
+        self.kitchen_obj = None
+        self.ing_map = None
+        self._next_order_id = 0
+        self.meal_map = Ingredient_map.get_meals_map()
+        print(self.meal_map)
+
+    @synchronized
+    def get_order_id(self):
+        x = self._next_order_id
+        self._next_order_id += 1
+        return x
 
     @synchronized
     def __new__(cls, *args, **kwargs):
@@ -49,6 +60,7 @@ class Server:
         s.listen()
         self.soc = s
         self.conn, self.addr = s.accept()
+
 
     def send_object(self, data):
         if self.soc is None:
@@ -109,9 +121,14 @@ class Server:
                 pass
             elif msg.req == Request.G_ING_MAP:  # get ingredient map
                 self.send_object(self.ing_map.instance.map)
+            elif msg.req == Request.G_MEALS_MAP:
+                self.send_object(self.meal_map)
             elif msg.req == Request.P_ORDER:
+                x = self.get_order_id()
+                msg.data.order_id = x
                 self.order_m.add_order(msg.data)
                 self.prepare_order()
+                self.send_object(x)
 
         # end while
         soc.close()

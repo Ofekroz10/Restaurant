@@ -49,12 +49,12 @@ class Meal(ABC):
     @property
     def status(self):
         try:
-            return  self._status
+            return self._status
         except:
             raise NotImplementedError
 
     def status_plus(self):
-        self._status = self.status+1
+        self._status = self.status + 1
 
     def add_ingredient(self, ingredient):
         print(self.ing_map.keys())
@@ -88,10 +88,8 @@ class Meal(ABC):
 
     def read_ing(self, file_name):
         ZERO_AMOUNT = 0
-        with open(file_name, 'r') as file:
-            for i in file.readlines():
-                i = i.replace('\n', '')
-                self._ing_map[i] = ZERO_AMOUNT
+        for i in self.meals_map[file_name]:
+            self._ing_map[i] = ZERO_AMOUNT
 
     def make_ing_amount_zero(self, ingredient):
         ZERO_AMOUNT = 0
@@ -106,22 +104,39 @@ class Meal(ABC):
     def get_ingredients(self):
         return self.ing_map.keys()
 
+    def __str__(self):
+        content = '*'+self.name+'* ' + '\n'
+        for ing in self.ing_map:
+            amount = self.ing_map[ing]
+            content += ing + ' ' + str(amount) + ' .....' + ' ' + str(self.all_ing_map[ing].price * amount) + '$'
+            content += '  '
+        content += '*Total price: *'+ str(self.price) + '  '
+        content += '*Total seconds: *'+ str(self.seconds)
+        return content
 
 class Burger(Meal):
-    def __init__(self, all_ing_map):
+    file = 'burger'
+
+    def __init__(self, all_ing_map, meals_map):
         self._all_ing_map = all_ing_map
+        self.meals_map = meals_map
         self._ing_map = {}
         self._name = 'Burger'
         self._price = 0
         self._seconds = 0
-        self.read_ing('burger.txt')
+        self.read_ing(Burger.file)
+        self.img = 'burger.jpg'
 
 
 class Salad(Meal):
-    def __init__(self, ing_map):
+    file = 'salad'
+
+    def __init__(self, ing_map, meals_map):
         self._all_ing_map = ing_map
+        self.meals_map = meals_map
         self._ing_map = {}
         self._name = 'Salad'
         self._price = 0
         self._seconds = 0
-        self.read_ing('salad.txt')
+        self.read_ing(Salad.file)
+        self.img = 'salad.jpg'
