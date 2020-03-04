@@ -53,6 +53,6 @@ To add new ingridient, just add it to the json file (ing.json)
 {"name":"ing_name", "price":x, "sec":y} # X, Y are numbers
 ```
 
-<h2>How to use this project? <\h2>
+<h2>How to use this project? </h2>
 First, run back.py this is the server, you will see the kitchen screen.
 Then, run main_client.py. You can run unlimited times this file, this is the client.
