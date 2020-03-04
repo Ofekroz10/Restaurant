@@ -99,7 +99,7 @@ class Server:
     PORT = 3000
     SIZE = 1000
     HEADERSIZE = sys.getsizeof(int)
-    WORKERS = 1
+    WORKERS = 2
     _s_instance = None
 
     wait_lock = threading.Lock()
