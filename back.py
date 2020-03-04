@@ -157,7 +157,10 @@ class Server:
         self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.soc.bind((self.HOST, self.PORT))
         while True:
-            self.listen()
+            try:
+                self.listen()
+            except:
+                pass
 
         # end while
         soc.close()

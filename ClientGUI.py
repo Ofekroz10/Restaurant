@@ -30,18 +30,25 @@ from PIL import Image, ImageTk
 import os.path
 import globals
 
+def on_closing():
+    global client, root
+    client.soc.close()
+    root.destroy()
+
 
 def vp_start_gui(main_client_obj):
     '''Starting point when module is the main routine.'''
     global val, w, root
     global prog_location
-    global top
+    global top, client
 
     prog_call = sys.argv[0]
     prog_location = os.path.split(prog_call)[0]
     root = tk.Tk()
+    client = main_client_obj
     top = ClientPage(root)
     top.main_client = main_client_obj
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
 
 

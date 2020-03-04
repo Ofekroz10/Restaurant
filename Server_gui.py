@@ -27,15 +27,26 @@ except ImportError:
 
     py3 = True
 
+def on_closing():
+    global serv, root, check_update, update_th
+    serv.soc.close()
+    check_update = False
+    update_th.join()
+    root.destroy()
+
 
 def vp_start_gui(server):
     '''Starting point when module is the main routine.'''
-    global val, w, root
+    global val, w, root, serv, update_th, check_update
     root = tk.Tk()
     top = Toplevel1(root)
     top.server = server
+    check_update = True
     update_thread = Update(top)
     update_thread.start()
+    update_th = update_thread
+    serv = server
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
     return top
 
@@ -66,7 +77,8 @@ class Update(Thread):
         self.gui = gui
 
     def run(self):
-        while True:
+        global check_update
+        while check_update:
             if self.gui.server is not None and self.gui.server.order_m is not None:
                 with back.Server.wait_lock:
                     self.gui.wating_lst.delete(0, tk.END)
