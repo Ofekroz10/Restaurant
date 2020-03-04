@@ -1,6 +1,11 @@
-{"name":"ham", "price":20, "sec":50}
-{"name":"cheese", "price":5, "sec":10}
-{"name":"bacon", "price":20, "sec":7}
+{"name":"ham", "price":20, "sec":5}
+{"name":"cheese", "price":5, "sec":1}
+{"name":"bacon", "price":20, "sec":2}
 {"name":"tomato", "price":2, "sec":5}
-{"name":"cucumber", "price":5, "sec":15}
-{"name":"lettuce", "price":3, "sec":10}
+{"name":"cucumber", "price":5, "sec":1}
+{"name":"lettuce", "price":3, "sec":1}
+{"name":"mashroom", "price":2, "sec":2}
+{"name":"tomato sauce", "price":3, "sec":1}
+{"name":"onion", "price":2, "sec":2}
+{"name":"egg", "price":1, "sec":1}
+{"name":"mayo", "price":2, "sec":1}

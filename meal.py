@@ -105,14 +105,15 @@ class Meal(ABC):
         return self.ing_map.keys()
 
     def __str__(self):
-        content = '*'+self.name+'* ' + '\n'
+        content = '*' + self.name + '* ' + '\n'
         for ing in self.ing_map:
             amount = self.ing_map[ing]
             content += ing + ' ' + str(amount) + ' .....' + ' ' + str(self.all_ing_map[ing].price * amount) + '$'
             content += '  '
-        content += '*Total price: *'+ str(self.price) + '  '
-        content += '*Total seconds: *'+ str(self.seconds)
+        content += '*Total price: *' + str(self.price) + '  '
+        content += '*Total seconds: *' + str(self.seconds)
         return content
+
 
 class Burger(Meal):
     file = 'burger'
@@ -140,3 +141,31 @@ class Salad(Meal):
         self._seconds = 0
         self.read_ing(Salad.file)
         self.img = 'salad.jpg'
+
+
+class Pizza(Meal):
+    file = 'pizza'
+
+    def __init__(self, ing_map, meals_map):
+        self._all_ing_map = ing_map
+        self.meals_map = meals_map
+        self._ing_map = {}
+        self._name = 'Pizza'
+        self._price = 0
+        self._seconds = 0
+        self.read_ing(Pizza.file)
+        self.img = 'pizza.jpg'
+
+
+class Sandwich(Meal):
+    file = 'sandwich'
+
+    def __init__(self, ing_map, meals_map):
+        self._all_ing_map = ing_map
+        self.meals_map = meals_map
+        self._ing_map = {}
+        self._name = 'Sandwich'
+        self._price = 0
+        self._seconds = 0
+        self.read_ing(Sandwich.file)
+        self.img = 'sandwich.jpg'

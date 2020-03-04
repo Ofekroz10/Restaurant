@@ -41,7 +41,7 @@ def vp_start_gui(main_client_obj):
     prog_location = os.path.split(prog_call)[0]
     root = tk.Tk()
     top = ClientPage(root)
-    top. main_client = main_client_obj
+    top.main_client = main_client_obj
     root.mainloop()
 
 
@@ -67,8 +67,17 @@ def destroy_ClientPage():
     w.destroy()
     w = None
 
+def sandwich_click():
+    globals.current_meal = meal.Sandwich(globals.ing_map, globals.meals_map)
+    select_ing_gui.show()
+
 def burger_clieked():
     globals.current_meal = meal.Burger(globals.ing_map, globals.meals_map)
+    select_ing_gui.show()
+
+
+def pizza_click():
+    globals.current_meal = meal.Pizza(globals.ing_map, globals.meals_map)
     select_ing_gui.show()
 
 
@@ -76,15 +85,17 @@ def salad_click():
     globals.current_meal = meal.Salad(globals.ing_map, globals.meals_map)
     select_ing_gui.show()
 
+
 def clean_lst():
     global top
-    top.meals_lst.delete(0,tk.END)
+    top.meals_lst.delete(0, tk.END)
+
 
 def render_lst():
     global top
 
     i = 0
-    total_price= 0
+    total_price = 0
     total_sec = 0
     for m in globals.cart:
         print('add')
@@ -92,8 +103,9 @@ def render_lst():
         total_price += m.price
         total_sec += m.seconds
         i += 1
-    top.price_l.configure(text="Total price: "+str(total_price)+'$')
+    top.price_l.configure(text="Total price: " + str(total_price) + '$')
     top.time_l.configure(text="Total sec: " + str(total_sec))
+
 
 class ClientPage:
 
@@ -102,7 +114,7 @@ class ClientPage:
         index = selection[0]
         clean_lst()
         print(index)
-        del(globals.cart[index])
+        del (globals.cart[index])
         total_price = 0
         total_sec = 0
         i = 0
@@ -123,12 +135,11 @@ class ClientPage:
         clean_lst()
         globals.cart = []
         globals.current_meal = None
-        tkinter.messagebox.showinfo(title="Info", message="Your order: "+str(order.order_id) +" added to the queue")
-        self.time_l.configure(text= 'Total sec: 0')
-        self.price_l.configure(text = 'Total price: 0$')
+        tkinter.messagebox.showinfo(title="Info", message="Your order: " + str(order.order_id) + " added to the queue")
+        self.time_l.configure(text='Total sec: 0')
+        self.price_l.configure(text='Total price: 0$')
 
-
-    def __init__(self,top=None):
+    def __init__(self, top=None):
         self.index = 0
         '''This class configures and populates the toplevel window.
            top is the toplevel containing window.'''
@@ -156,7 +167,7 @@ class ClientPage:
         self.meals_label.configure(foreground="#800000")
         self.meals_label.configure(text='''Add a Meal''')
 
-        self.burger_b = tk.Button(top, command = burger_clieked)
+        self.burger_b = tk.Button(top, command=burger_clieked)
         self.burger_b.place(relx=0.05, rely=0.133, height=64, width=82)
         self.burger_b.configure(activebackground="#ececec")
         self.burger_b.configure(activeforeground="#000000")
@@ -188,9 +199,40 @@ class ClientPage:
         self.salad_b.configure(pady="0")
         self.salad_b.configure(text='''Button''')
 
+        self.pizza_b = tk.Button(top, command=pizza_click)
+        self.pizza_b.place(relx=0.05, rely=0.511, height=63, width=82)
+        self.pizza_b.configure(activebackground="#ececec")
+        self.pizza_b.configure(activeforeground="#000000")
+        self.pizza_b.configure(background="#d9d9d9")
+        self.pizza_b.configure(disabledforeground="#a3a3a3")
+        self.pizza_b.configure(foreground="#000000")
+        self.pizza_b.configure(highlightbackground="#d9d9d9")
+        self.pizza_b.configure(highlightcolor="black")
+        photo_location = os.path.join(prog_location, "pizza.jpg")
+        global _img2
+        _img2 = ImageTk.PhotoImage(file=photo_location)
+        self.pizza_b.configure(image=_img2)
+        self.pizza_b.configure(pady="0")
+        self.pizza_b.configure(text='''Button''')
+
+        self.sand_b = tk.Button(top, command=sandwich_click)
+        self.sand_b.place(relx=0.05, rely=0.7, height=63, width=82)
+        self.sand_b.configure(activebackground="#ececec")
+        self.sand_b.configure(activeforeground="#000000")
+        self.sand_b.configure(background="#d9d9d9")
+        self.sand_b.configure(disabledforeground="#a3a3a3")
+        self.sand_b.configure(foreground="#000000")
+        self.sand_b.configure(highlightbackground="#d9d9d9")
+        self.sand_b.configure(highlightcolor="black")
+        photo_location = os.path.join(prog_location, "sandwich.jpg")
+        global _img3
+        _img3 = ImageTk.PhotoImage(file=photo_location)
+        self.sand_b.configure(image=_img3)
+        self.sand_b.configure(pady="0")
+        self.sand_b.configure(text='''Button''')
 
 
-        self.ok_b = tk.Button(top, command= self.create_order)
+        self.ok_b = tk.Button(top, command=self.create_order)
         self.ok_b.place(relx=0.05, rely=0.871, height=33, width=55)
         self.ok_b.configure(activebackground="#ececec")
         self.ok_b.configure(activeforeground="#000000")
@@ -204,13 +246,13 @@ class ClientPage:
 
         self.meals_lst = tk.Listbox(top)
         self.meals_lst.place(relx=0.15, rely=0.222, relheight=0.573
-                           , relwidth=0.7)
+                             , relwidth=0.7)
         self.meals_lst.configure(background="white")
         self.meals_lst.configure(disabledforeground="#a3a3a3")
         self.meals_lst.configure(font="TkFixedFont")
         self.meals_lst.configure(foreground="#000000")
 
-        self.del_b = tk.Button(top, command = self.del_meal)
+        self.del_b = tk.Button(top, command=self.del_meal)
         self.del_b.place(relx=0.87, rely=0.3, height=40, width=120)
         self.del_b.configure(activebackground="#ececec")
         self.del_b.configure(activeforeground="#000000")
@@ -247,7 +289,7 @@ class ClientPage:
         self.priority_l.configure(text='''Priority: ''')
 
         self.priority_b = ttk.Combobox(top)
-        self.priority_b.place(relx=0.3, rely=0.81, relheight=0.058, relwidth = 0.312)
+        self.priority_b.place(relx=0.3, rely=0.81, relheight=0.058, relwidth=0.312)
         self.priority_b.configure(takefocus="")
 
         priority_lst = []
@@ -259,8 +301,5 @@ class ClientPage:
         self.priority_b.current(0)
 
 
-
 def show(main_client_obj):
     vp_start_gui(main_client_obj)
-
-

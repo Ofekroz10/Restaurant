@@ -22,7 +22,7 @@ class Order:
         self.priority = priority
 
     def __str__(self):
-        return str(self.order_id) + ' ' + str(self.priority)
+        return str(self.order_id) + ' ' + Priority(self.priority).name
 
     def calc_sec(self):
         sec = 0
@@ -55,6 +55,12 @@ class OrderManager:  # make singlethon... with thread safe
 
     def __len__(self):
         return len(self._orders)
+
+    def clone(self):
+        clone_lst = []
+        for i in self._orders.collection:
+            clone_lst.append(i)
+        return clone_lst
 
 
 class PriorityQueue:
